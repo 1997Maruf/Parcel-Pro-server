@@ -1,5 +1,4 @@
 const express = require("express");
-var jwt = require('jsonwebtoken');
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
@@ -29,17 +28,24 @@ async function run() {
     const bookingCollection = client.db("parcel").collection("booking");
     const userCollection = client.db("parcel").collection("users");
     //jwt related api
-    app.post('/jwt', async(req, res)=>{
-        const user = req.body;
-        const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'1h'});
-        res.send({token})
+    
+    //middlewares
+    // 1 user
+    app.get('/users/:email', async (req, res) =>{
+      const email =req.params.email
+      const result = await userCollection.findOne({email});
+      res.send(result);
     })
+
+
+
     app.post("/booking", async (req, res) => {
       const booking = req.body;
       console.log(booking);
       const result = await bookingCollection.insertOne(booking);
       res.send(result);
     });
+    
     app.post("/users", async (req, res) => {
       const user = req.body;
       const query = { email: user.email };
@@ -50,11 +56,28 @@ async function run() {
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
+    // alluser
     app.get("/users", async (req, res) => {
-      const user = req.body;
-      const result = await userCollection.find(user).toArray();
+      const cursor = userCollection.find();
+      const result = await cursor.toArray();
       res.send(result);
     });
+
+    // adin
+    app.get('/users/admin/:email', async(req, res) =>{
+     const email = req.params.email;
+     if(email !== req.decoded.email){
+      return res.status(403).send({message: 'unauthorized access'});
+     }
+     const query = {email: email};
+     const user = await userCollection.findOne(query);
+     let admin = false;
+     if(user){
+      admin = user?.role === 'admin';
+     }
+     res.send({admin});
+    })
+    
     // update admin
     app.patch("/users/admin/:id", async (req, res) => {
       const id = req.params.id;
@@ -91,6 +114,8 @@ async function run() {
       const result = await bookingCollection.find(query).toArray();
       res.send(result);
     });
+    
+    
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
