@@ -37,13 +37,41 @@ async function run() {
       res.send(result);
     })
 
-   //delete Assignment
+   //delete booking
    app.delete("/booking/:id", async (req, res) => {
     const id = req.params.id;
     const query = { _id: new ObjectId(id) };
     const result = await bookingCollection.deleteOne(query);
     res.send(result);
   });
+  // update booking
+  app.put('/booking/:id', async(req, res) => {
+    const id = req.params.id;
+    const filter = {_id: new ObjectId(id)}
+    const options = { upsert: true };
+    const updateCraft = req.body;
+    const craft = {
+        $set: {
+          type: updateCraft.type,
+            deliveryDate: updateCraft.deliveryDate,
+            bookingDate: updateCraft.bookingDate,
+            
+        }
+    }
+const result = await bookingCollection.updateOne(filter, craft, options);
+res.send(result);
+   
+})
+
+
+app.get('/booking/:id', async(req, res) =>{
+  const id =req.params.id;
+  const query = {_id: new ObjectId(id)}
+  const result = await bookingCollection.findOne(query);
+  res.send(result);
+})
+
+
 
     app.post("/booking", async (req, res) => {
       const booking = req.body;
