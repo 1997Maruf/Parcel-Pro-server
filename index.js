@@ -85,23 +85,7 @@ app.get('/booking/:id', async(req, res) =>{
 
 
 
-    app.post("/booking", async (req, res) => {
-      const booking = req.body;
-      console.log(booking);
-      const result = await bookingCollection.insertOne(booking);
-      res.send(result);
-    });
-    
-    app.post("/users", async (req, res) => {
-      const user = req.body;
-      const query = { email: user.email };
-      const existingUser = await userCollection.findOne(query);
-      if (existingUser) {
-        return res.send({ message: "user already exists", insertedId: null });
-      }
-      const result = await userCollection.insertOne(user);
-      res.send(result);
-    });
+  
     // alluser
     app.get("/users", async (req, res) => {
       const cursor = userCollection.find();
