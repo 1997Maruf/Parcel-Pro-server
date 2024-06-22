@@ -7,7 +7,11 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 //middleware
-app.use(cors());
+const corsConfig = {
+  origin: ["http://localhost:5173", "https://remarkable-horse-b39fc9.netlify.app"],
+  credentials: true,
+};
+app.use(cors(corsConfig));
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.a87xhva.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -24,7 +28,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const bookingCollection = client.db("parcel").collection("booking");
     const userCollection = client.db("parcel").collection("users");
@@ -69,6 +73,13 @@ app.get('/booking/:id', async(req, res) =>{
   const id =req.params.id;
   const query = {_id: new ObjectId(id)}
   const result = await bookingCollection.findOne(query);
+  res.send(result);
+})
+// my delibery list
+app.get('/booking/:id', async(req, res) =>{
+  const id =req.params.id;
+  const query = {_id: new ObjectId(id)}
+  const result = await bookingCollection.find(query).toArray();
   res.send(result);
 })
 
@@ -149,13 +160,32 @@ app.get('/booking/:id', async(req, res) =>{
       const result = await bookingCollection.find(query).toArray();
       res.send(result);
     });
+    //Manage Button api
+    app.put('/booking/:id', async(req, res) => {
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const options = { upsert: true };
+      const updateCraft = req.body;
+      const craft = {
+          $set: {
+              status:'On The Way',
+              deliveryManId: updateCraft.deliveryManId,
+              approximateDeliveryDate: updateCraft.approximateDeliveryDate,
+              
+          }
+      }
+  const result = await bookingCollection.updateOne(filter, craft, options);
+  res.send(result);
+     
+  })
+
     
     //payment intent
     app.post('/create-payment-intent', async (req, res) => {
       const {price} = req.body;
       const amount = parseInt(price * 100);
-
-      const paymentIntent = await stripe.paymentIntent.create({
+     console.log({price})
+      const paymentIntent = await stripe.paymentIntents.create({
         amount : amount,
         currency: 'usd',
         payment_method_types: ['card']
@@ -165,11 +195,11 @@ app.get('/booking/:id', async(req, res) =>{
       })
     })
 
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // // Send a ping to confirm a successful connection
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
