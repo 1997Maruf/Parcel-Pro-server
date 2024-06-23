@@ -7,11 +7,11 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 //middleware
-const corsConfig = {
-  origin: ["http://localhost:5173", "https://remarkable-horse-b39fc9.netlify.app"],
-  credentials: true,
-};
-app.use(cors(corsConfig));
+// const corsConfig = {
+//   origin: ["http://localhost:5173","https://chipper-tapioca-ce3ca9.netlify.app"],
+//   credentials: true,
+// };
+app.use(cors());
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.a87xhva.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -28,7 +28,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    await client.connect();
 
     const bookingCollection = client.db("parcel").collection("booking");
     const userCollection = client.db("parcel").collection("users");
@@ -50,23 +50,23 @@ async function run() {
     res.send(result);
   });
   // update booking
-  app.put('/booking/:id', async(req, res) => {
-    const id = req.params.id;
-    const filter = {_id: new ObjectId(id)}
-    const options = { upsert: true };
-    const updateCraft = req.body;
-    const craft = {
-        $set: {
-          type: updateCraft.type,
-            deliveryDate: updateCraft.deliveryDate,
-            bookingDate: updateCraft.bookingDate,
+//   app.put('/booking/:id', async(req, res) => {
+//     const id = req.params.id;
+//     const filter = {_id: new ObjectId(id)}
+//     const options = { upsert: true };
+//     const updateCraft = req.body;
+//     const craft = {
+//         $set: {
+//           type: updateCraft.type,
+//             deliveryDate: updateCraft.deliveryDate,
+//             bookingDate: updateCraft.bookingDate,
             
-        }
-    }
-const result = await bookingCollection.updateOne(filter, craft, options);
-res.send(result);
+//         }
+//     }
+// const result = await bookingCollection.updateOne(filter, craft, options);
+// res.send(result);
    
-})
+// })
 
 
 app.get('/booking/:id', async(req, res) =>{
@@ -162,15 +162,19 @@ app.post("/users", async (req, res) => {
     });
     //Manage Button api
     app.put('/booking/:id', async(req, res) => {
+      console.log("ami")
+     
       const id = req.params.id;
+      console.log(req.params._id)
       const filter = {_id: new ObjectId(id)}
       const options = { upsert: true };
-      const updateCraft = req.body;
+      const updateBook = req.body;
+      console.log("updateBook",updateBook);
       const craft = {
           $set: {
               status:'On The Way',
-              deliveryManId: updateCraft.deliveryManId,
-              approximateDeliveryDate: updateCraft.approximateDeliveryDate,
+              deliveryMenId: updateBook.deliveryMenId,
+              approximateDate: updateBook.approximateDate,
               
           }
       }
@@ -196,10 +200,10 @@ app.post("/users", async (req, res) => {
     })
 
     // // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
-    // console.log(
-    //   "Pinged your deployment. You successfully connected to MongoDB!"
-    // );
+    await client.db("admin").command({ ping: 1 });
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
