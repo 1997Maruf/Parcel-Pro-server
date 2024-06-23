@@ -87,9 +87,9 @@ app.get('/booking/:id', async(req, res) =>{
   res.send(result);
 })
 // my delibery list
-app.get('/booking/:id', async(req, res) =>{
+app.get('/bookingById/:id', async(req, res) =>{
   const id =req.params.id;
-  const query = {_id: new ObjectId(id)}
+  const query = {deliveryMenId: (id)}
   const result = await bookingCollection.find(query).toArray();
   res.send(result);
 })
@@ -106,6 +106,13 @@ app.post("/feetdbacks", async (req, res) => {
   const feetdback = req.body;
   console.log(feetdback);
   const result = await feetdbackCollection.insertOne(feetdback);
+  res.send(result);
+});
+// feedback get api
+app.get("/feetdbacks/:id", async (req, res) => {
+  const id =req.params.id;
+  const query = {deliveryMenId:(id)}
+  const result = await feetdbackCollection.find(query).toArray();
   res.send(result);
 });
 
@@ -193,6 +200,25 @@ app.post("/users", async (req, res) => {
               status:'On The Way',
               deliveryMenId: updateBook.deliveryMenId,
               approximateDate: updateBook.approximateDate,
+              
+          }
+      }
+  const result = await bookingCollection.updateOne(filter, craft, options);
+  res.send(result);
+     
+  })
+    app.put('/booking/:id', async(req, res) => {
+      console.log("ami")
+     
+      const id = req.params.id;
+      console.log("id",req.params._id)
+      const filter = {_id: new ObjectId(id)}
+      const options = { upsert: true };
+      const updateStatus = req.body;
+      const craft = {
+          $set: {
+              status:updateStatus.status,
+              
               
           }
       }
