@@ -217,7 +217,28 @@ app.post("/users", async (req, res) => {
       const updateStatus = req.body;
       const craft = {
           $set: {
+            status:  "cancelled",
               status:updateStatus.status,
+              
+              
+          }
+      }
+  const result = await bookingCollection.updateOne(filter, craft, options);
+  res.send(result);
+     
+  })
+    app.put('/booking/:id', async(req, res) => {
+      console.log("ami")
+     
+      const id = req.params.id;
+      console.log("id",req.params._id)
+      const filter = {_id: new ObjectId(id)}
+      const options = { upsert: true };
+      const updateSta = req.body;
+      const craft = {
+          $set: {
+            status:'Delivered',
+              st:updateSta.st
               
               
           }
