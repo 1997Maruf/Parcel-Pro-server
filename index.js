@@ -28,19 +28,30 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const bookingCollection = client.db("parcel").collection("booking");
     const userCollection = client.db("parcel").collection("users");
+    const feetdbackCollection = client.db("parcel").collection("feetdbacks");
     //jwt related api
     
-    //middlewares
+    // middlewares
     // 1 user
+    // app.get('/users/:email', async (req, res) =>{
+    //   const email =req.params.email
+    //   const result = await userCollection.findOne({email});
+    //   res.send(result);
+    // })
     app.get('/users/:email', async (req, res) =>{
       const email =req.params.email
       const result = await userCollection.findOne({email});
       res.send(result);
     })
+    // app.get('/users/:email', async (req, res) =>{
+    //   const email =req.params.email
+    //   const result = await userCollection.findOne({email});
+    //   res.send(result);
+    // })
 
    //delete booking
    app.delete("/booking/:id", async (req, res) => {
@@ -88,6 +99,13 @@ app.post("/booking", async (req, res) => {
   const booking = req.body;
   console.log(booking);
   const result = await bookingCollection.insertOne(booking);
+  res.send(result);
+});
+// feetdbacks post api
+app.post("/feetdbacks", async (req, res) => {
+  const feetdback = req.body;
+  console.log(feetdback);
+  const result = await feetdbackCollection.insertOne(feetdback);
   res.send(result);
 });
 
