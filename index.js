@@ -248,6 +248,28 @@ app.post("/users", async (req, res) => {
      
   })
 
+    //update profile
+    app.put('/users', async(req, res) => {
+      console.log("ami")
+     
+      const email = req.query.email;
+      console.log("id",req.query._id)
+      const filter = {email:email}
+      const options = { upsert: true };
+      const userInfo = req.body;
+      const craft = {
+          $set: {
+           
+              image: userInfo.image
+              
+              
+          }
+      }
+  const result = userCollection.updateOne(filter, craft, options);
+  res.send(result);
+     
+  })
+
     
     //payment intent
     app.post('/create-payment-intent', async (req, res) => {
@@ -265,7 +287,7 @@ app.post("/users", async (req, res) => {
     })
 
     // // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
